@@ -17,7 +17,7 @@ fun main() {
         return Location(sX, sY)
     }
 
-    data class FourChars(val x: Location, val m: Location, val a: Location, val s: Location)
+    data class FourChars(val first: Location, val second: Location, val third: Location, val fourth: Location)
 
     data class ThreeChars(val first: Location, val second: Location, val third: Location) {
         fun expectFourCharsAt(): FourChars {
@@ -33,11 +33,11 @@ fun main() {
         }
     }
 
-    fun findAll(char: Char, input: Array<Array<Char>>): List<Location> {
+    fun Array<Array<Char>>.findAll(char: Char): List<Location> {
         val locations = mutableListOf<Location>()
-        for (i in input.indices) {
-            for (j in input[i].indices) {
-                if (input[i][j] == char) {
+        for (i in indices) {
+            for (j in this[i].indices) {
+                if (this[i][j] == char) {
                     locations.add(Location(i, j))
                 }
             }
@@ -45,31 +45,34 @@ fun main() {
         return locations.toList()
     }
 
+    fun Array<Array<Char>>.locationMatchesChar(loc: Location, char: Char) = this[loc.x][loc.y] == char
+
+    fun Array<Array<Char>>.containsLocation(location: Location) =
+        location.x >= 0 && location.y >= 0 && location.x < this[0].size && location.y < size
+
     fun mas(lines: Array<Array<Char>>): List<ThreeChars> {
-        val mLocations = findAll('M', lines)
-        val aLocations = findAll('A', lines)
-        val mas = aLocations
+        val mLocations = lines.findAll('M')
+        val aLocations = lines.findAll('A')
+        return aLocations
             .flatMap { a -> mLocations.filter { m -> m.isNeighbourTo(a) }.map { TwoChars(it, a) } }
             .map { it.expectThirdAt() }
-            .filterNot { mas -> mas.third.x < 0 || mas.third.y < 0 || mas.third.x >= lines[0].size || mas.third.y >= lines.size }
-            .filter { mas -> lines[mas.third.x][mas.third.y] == 'S' }
-        return mas
+            .filter { mas -> lines.containsLocation(mas.third) }
+            .filter { mas -> lines.locationMatchesChar(mas.third, 'S') }
     }
 
     fun xmas(lines: Array<Array<Char>>): List<FourChars> {
-        val xLocations = findAll('X', lines)
-        val mLocations = findAll('M', lines)
-        val xmsCandidates = mLocations
+        val xLocations = lines.findAll('X')
+        val mLocations = lines.findAll('M')
+        return mLocations
             .flatMap { m -> xLocations.filter { x -> x.isNeighbourTo(m) }.map { TwoChars(it, m) } }
             .map { it.expectThirdAt() }
             .asSequence()
-            .filterNot { xma -> xma.third.x < 0 || xma.third.y < 0 || xma.third.x >= lines[0].size || xma.third.y >= lines.size }
-            .filter { xma -> lines[xma.third.x][xma.third.y] == 'A' }
+            .filterNot { xma -> lines.containsLocation(xma.third) }
+            .filter { xma -> lines.locationMatchesChar(xma.third, 'A') }
             .map { it.expectFourCharsAt() }
-            .filterNot { xmas -> xmas.s.x < 0 || xmas.s.y < 0 || xmas.s.x >= lines[0].size || xmas.s.y >= lines.size }
-            .filter { xmas -> lines[xmas.s.x][xmas.s.y] == 'S' }
+            .filterNot { xmas -> xmas.fourth.x < 0 || xmas.fourth.y < 0 || xmas.fourth.x >= lines[0].size || xmas.fourth.y >= lines.size }
+            .filter { xmas -> lines.locationMatchesChar(xmas.fourth, 'S') }
             .toList()
-        return xmsCandidates
     }
 
     fun part1(lines: Array<Array<Char>>): Int {
