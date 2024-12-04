@@ -20,17 +20,11 @@ fun main() {
     data class FourChars(val first: Location, val second: Location, val third: Location, val fourth: Location)
 
     data class ThreeChars(val first: Location, val second: Location, val third: Location) {
-        fun expectFourCharsAt(): FourChars {
-            val next = second.calcNextLocation(third)
-            return FourChars(first, second, third, next)
-        }
+        fun expectFourCharsAt(): FourChars = FourChars(first, second, third, second.calcNextLocation(third))
     }
 
     data class TwoChars(val first: Location, val second: Location) {
-        fun expectThirdAt(): ThreeChars {
-            val next = first.calcNextLocation(second)
-            return ThreeChars(first, second, next)
-        }
+        fun expectThreeCharsAt(): ThreeChars = ThreeChars(first, second, first.calcNextLocation(second))
     }
 
     fun Array<Array<Char>>.findAll(char: Char): List<Location> {
@@ -45,50 +39,55 @@ fun main() {
         return locations.toList()
     }
 
-    fun Array<Array<Char>>.locationMatchesChar(loc: Location, char: Char) = this[loc.x][loc.y] == char
+    fun Array<Array<Char>>.containsCharAtLocation(char: Char, location: Location) =
+        (location.x >= 0 && location.y >= 0 && location.x < this[0].size && location.y < size)
+                && this[location.x][location.y] == char
 
-    fun Array<Array<Char>>.containsLocation(location: Location) =
-        location.x >= 0 && location.y >= 0 && location.x < this[0].size && location.y < size
-
-    fun mas(lines: Array<Array<Char>>): List<ThreeChars> {
-        val mLocations = lines.findAll('M')
-        val aLocations = lines.findAll('A')
+    fun Array<Array<Char>>.allMas(): List<ThreeChars> {
+        val mLocations = findAll('M')
+        val aLocations = findAll('A')
         return aLocations
             .flatMap { a -> mLocations.filter { m -> m.isNeighbourTo(a) }.map { TwoChars(it, a) } }
-            .map { it.expectThirdAt() }
-            .filter { mas -> lines.containsLocation(mas.third) }
-            .filter { mas -> lines.locationMatchesChar(mas.third, 'S') }
+            .map { it.expectThreeCharsAt() }
+            .filter { mas -> containsCharAtLocation('S', mas.third) }
     }
 
-    fun xmas(lines: Array<Array<Char>>): List<FourChars> {
-        val xLocations = lines.findAll('X')
-        val mLocations = lines.findAll('M')
+    fun Array<Array<Char>>.allXmas(): List<FourChars> {
+        val xLocations = findAll('X')
+        val mLocations = findAll('M')
         return mLocations
             .flatMap { m -> xLocations.filter { x -> x.isNeighbourTo(m) }.map { TwoChars(it, m) } }
-            .map { it.expectThirdAt() }
+            .map { it.expectThreeCharsAt() }
             .asSequence()
-            .filterNot { xma -> lines.containsLocation(xma.third) }
-            .filter { xma -> lines.locationMatchesChar(xma.third, 'A') }
+            .filter { xma -> containsCharAtLocation('A', xma.third) }
             .map { it.expectFourCharsAt() }
-            .filterNot { xmas -> xmas.fourth.x < 0 || xmas.fourth.y < 0 || xmas.fourth.x >= lines[0].size || xmas.fourth.y >= lines.size }
-            .filter { xmas -> lines.locationMatchesChar(xmas.fourth, 'S') }
+            .filter { xmas -> containsCharAtLocation('S', xmas.fourth) }
             .toList()
     }
 
-    fun part1(lines: Array<Array<Char>>): Int {
-        return xmas(lines).size
+    fun part1(grid: Array<Array<Char>>): Int {
+        return grid.allXmas().size
     }
 
-    fun part2(lines: Array<Array<Char>>): Int {
-        val allMas = mas(lines)
-        return allMas.flatMap { mas ->
-            allMas.filterNot { it == mas }
-                .filter { it.second == mas.second }
-                .filter {
-                    ((it.first.x == mas.first.x && (abs(it.third.y - mas.third.y) == 2))
-                            || (it.first.y == mas.first.y && (abs(it.third.x - mas.third.x) == 2)))
+    // m s    s m    m m    s s
+    //  α  or  a  or  a  or  a
+    // m s    s m    s s    m m
+    fun formsCross(a: ThreeChars, b: ThreeChars) =
+        ((a.first.x == b.first.x && (abs(a.third.y - b.third.y) == 2))
+                || (a.first.y == b.first.y && (abs(a.third.x - b.third.x) == 2)))
+
+    fun `allX-MAS`(allMas: List<ThreeChars>): List<ThreeChars> {
+        return allMas
+            .flatMap { mas ->
+                allMas.filter {
+                    it.second == mas.second && it != mas && formsCross(it, mas)
                 }
-        }.size / 2
+            }.also { check(it.size % 2 == 0) { "expected even number of x-mas pairs" } }
+    }
+
+    fun part2(grid: Array<Array<Char>>): Int {
+        val allMas = grid.allMas()
+        return `allX-MAS`(allMas).size / 2
     }
 
     // Test if implementation meets criteria from the description, like:
