@@ -6,7 +6,13 @@ import kotlin.io.path.readText
 /**
  * Reads lines from the given input txt file.
  */
-fun readInput(name: String) = Path("src/$name.txt").readText().trim().lines()
+fun readInput(name: String) = Path("src/${name.lowercase()}/$name.txt").readText().trim().lines()
+
+fun readInputAsString(name: String) = Path("src/${name.lowercase()}/$name.txt").readText().trim()
+
+fun readTestInput(path: String) = Path("src/$path.txt").readText().trim().lines()
+
+fun readTestInputAsString(path: String) = Path("src/$path.txt").readText().trim()
 
 /**
  * Converts string to md5 hash.

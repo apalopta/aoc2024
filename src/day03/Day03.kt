@@ -1,3 +1,7 @@
+package day03
+
+import readInput
+
 fun main() {
     val regex = """mul\((?<a>\d{1,3}),(?<b>\d{1,3})\)""".toRegex()
 
