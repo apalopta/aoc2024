@@ -1,16 +1,15 @@
 package day04
 
+import Location
+import findAll
 import readInput
 import kotlin.math.abs
 
 fun main() {
-    data class Location(val x: Int, val y: Int) {
-        fun isNeighbourTo(location: Location): Boolean = this != location
-                && abs(x - location.x) in listOf(0, 1)
-                && abs(y - location.y) in listOf(0, 1)
 
-        override fun toString(): String = "($x, $y)"
-    }
+    fun Location.isNeighbourTo(location: Location): Boolean = this != location
+            && abs(x - location.x) in listOf(0, 1)
+            && abs(y - location.y) in listOf(0, 1)
 
     fun Location.calcNextLocation(second: Location): Location {
         val dX = second.x - x
@@ -28,18 +27,6 @@ fun main() {
 
     data class TwoChars(val first: Location, val second: Location) {
         fun expectThreeCharsAt(): ThreeChars = ThreeChars(first, second, first.calcNextLocation(second))
-    }
-
-    fun Array<Array<Char>>.findAll(char: Char): List<Location> {
-        val locations = mutableListOf<Location>()
-        for (i in indices) {
-            for (j in this[i].indices) {
-                if (this[i][j] == char) {
-                    locations.add(Location(i, j))
-                }
-            }
-        }
-        return locations.toList()
     }
 
     fun Array<Array<Char>>.containsCharAtLocation(char: Char, location: Location) =
