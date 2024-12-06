@@ -1,6 +1,6 @@
 package day05
 
-import readInput
+import utils.readInput
 
 data class Rule(val first: Int, val second: Int)
 typealias Rules = List<Rule>

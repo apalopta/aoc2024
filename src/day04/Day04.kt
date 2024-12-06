@@ -1,37 +1,35 @@
 package day04
 
-import Location
-import findAll
-import readInput
+import utils.*
 import kotlin.math.abs
 
 fun main() {
 
-    fun Location.isNeighbourTo(location: Location): Boolean = this != location
-            && abs(x - location.x) in listOf(0, 1)
-            && abs(y - location.y) in listOf(0, 1)
+    fun Position.isNeighbourTo(position: Position): Boolean = this != position
+            && abs(x - position.x) in listOf(0, 1)
+            && abs(y - position.y) in listOf(0, 1)
 
-    fun Location.calcNextLocation(second: Location): Location {
+    fun Position.calcNextLocation(second: Position): Position {
         val dX = second.x - x
         val dY = second.y - y
         val sX = second.x + if (dX == 0) 0 else if (dX > 0) 1 else -1
         val sY = second.y + if (dY == 0) 0 else if (dY > 0) 1 else -1
-        return Location(sX, sY)
+        return Position(sX, sY)
     }
 
-    data class FourChars(val first: Location, val second: Location, val third: Location, val fourth: Location)
+    data class FourChars(val first: Position, val second: Position, val third: Position, val fourth: Position)
 
-    data class ThreeChars(val first: Location, val second: Location, val third: Location) {
+    data class ThreeChars(val first: Position, val second: Position, val third: Position) {
         fun expectFourCharsAt(): FourChars = FourChars(first, second, third, second.calcNextLocation(third))
     }
 
-    data class TwoChars(val first: Location, val second: Location) {
+    data class TwoChars(val first: Position, val second: Position) {
         fun expectThreeCharsAt(): ThreeChars = ThreeChars(first, second, first.calcNextLocation(second))
     }
 
-    fun Array<Array<Char>>.containsCharAtLocation(char: Char, location: Location) =
-        (location.x >= 0 && location.y >= 0 && location.x < this[0].size && location.y < size)
-                && this[location.x][location.y] == char
+    fun Array<Array<Char>>.containsCharAtLocation(char: Char, position: Position) =
+        (position.x >= 0 && position.y >= 0 && position.x < this[0].size && position.y < size)
+                && this[position.x][position.y] == char
 
     fun Array<Array<Char>>.allMas(): List<ThreeChars> {
         val mLocations = findAll('M')
