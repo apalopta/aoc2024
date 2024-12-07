@@ -91,8 +91,8 @@ val Area.allPositions: List<Position>
 
 fun Area.positionsFromHereTowardsDirection(here: Position, direction: Direction): List<Position> =
     when (direction) {
-        Direction.NORTH -> allPositions.filter { it.x < here.x && it.y == here.y }
-        Direction.EAST -> allPositions.filter { it.x == here.x && it.y > here.y }
-        Direction.SOUTH -> allPositions.filter { it.x > here.x && it.y == here.y }
-        Direction.WEST -> allPositions.filter { it.x == here.x && it.y < here.y }
+        Direction.NORTH -> allPositions.filter { it.x < here.x && it.y == here.y }.sortedByDescending { it.x }
+        Direction.EAST -> allPositions.filter { it.x == here.x && it.y > here.y }.sortedBy { it.y }
+        Direction.SOUTH -> allPositions.filter { it.x > here.x && it.y == here.y }.sortedBy { it.x }
+        Direction.WEST -> allPositions.filter { it.x == here.x && it.y < here.y }.sortedByDescending { it.y }
     }
