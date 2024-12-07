@@ -1,6 +1,9 @@
 package day07
 
 import utils.*
+import kotlin.time.measureTimedValue
+
+infix fun Long.join(other: Long): Long = "$this$other".toLong()
 
 fun main() {
     data class Equation(val res: Long, val numbers: List<Long>)
@@ -41,7 +44,7 @@ fun main() {
                         listOf(
                             it + num,
                             it * num,
-                            "$it$num".toLong()
+                            it join num
                         )
                     }
                 }
@@ -63,7 +66,9 @@ fun main() {
 
     val input = readInput("Day07")
     println("=== RESULT ===")
-    println(part1(input)) // 1620690235709
-    println(part2(input)) // 145397611075341
+    val timed1 = measureTimedValue { part1(input) }
+    println("${timed1.value} (${timed1.duration.inWholeMilliseconds} ms)") // 1620690235709 (127 ms)
+    val timed2 = measureTimedValue { part2(input) }
+    println("${timed2.value} (${timed2.duration.inWholeMilliseconds} ms)") // 145397611075341 (~1.3 sec)
 
 }
