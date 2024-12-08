@@ -44,6 +44,9 @@ fun Direction.turnRight() = when (this) {
 
 data class Position(val x: Int, val y: Int) {
     override fun toString(): String = "($x, $y)"
+    fun distanceTo(other: Position): Position = Position(other.x - x, other.y - y)
+    fun fromHere(other: Position): Position = Position(x + other.x, y + other.y)
+    fun fromHereBackwards(other: Position): Position = Position(x - other.x, y - other.y)
 }
 
 fun Position.move(direction: Direction) = when (direction) {
@@ -71,6 +74,17 @@ fun Area.findAll(char: Char): List<Position> {
     for (i in indices) {
         for (j in this[i].indices) {
             if (this[i][j] == char) {
+                positions.add(Position(i, j))
+            }
+        }
+    }
+    return positions.toList()
+}
+fun Area.findAllNot(char: Char): List<Position> {
+    val positions = mutableListOf<Position>()
+    for (i in indices) {
+        for (j in this[i].indices) {
+            if (this[i][j] != char) {
                 positions.add(Position(i, j))
             }
         }
