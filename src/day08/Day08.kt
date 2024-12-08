@@ -3,26 +3,45 @@ package day08
 import utils.*
 
 fun main() {
-    fun part1(area: Area, antennaFrequencies: List<Char>): Int {
-
-        val antennaLocations = antennaFrequencies.associateWith { area.findAll(it) }
+    fun part1(area: Area, antennaLocations: Map<Char, List<Position>>): Int {
 
         val antinodes = mutableSetOf<Position>()
         antennaLocations.forEach { (aType, positions) ->
-            println("$aType -> ${positions.joinToString(", ")}")
             positions.forEach { pos ->
-                positions.filter { it != pos }.forEach { other ->
-                    val dist = pos.distanceTo(other)
-                    val antinode = pos.fromHereBackwards(dist)
-                    if (area.containsLocation(antinode)) antinodes.add(antinode)
-                }
+                positions.filter { it != pos }
+                    .forEach { other ->
+                        val dist = pos.distanceTo(other)
+                        val antinode = pos.fromHereBackwards(dist)
+                        if (area.containsLocation(antinode)) antinodes.add(antinode)
+                    }
             }
         }
 
         return antinodes.size
     }
 
-    fun part2(lines: List<String>): Int = 1
+    fun part2(area: Area, antennaLocations: Map<Char, List<Position>>): Int {
+        val antinodes = mutableSetOf<Position>()
+        antennaLocations.forEach { (aType, positions) ->
+            positions.forEach { pos ->
+                positions.filter { it != pos }
+                    .forEach { other ->
+                        val dist = pos.distanceTo(other)
+                        var antinode = pos.fromHereBackwards(dist)
+                        antinodes.add(pos)
+                        if (area.containsLocation(antinode)) {
+                            antinodes.add(antinode)
+                        }
+                        while (area.containsLocation(antinode)) {
+                            antinode = antinode.fromHereBackwards(dist)
+                            if (area.containsLocation(antinode)) antinodes.add(antinode)
+                        }
+                    }
+            }
+        }
+
+        return antinodes.distinct().size
+    }
 
     // Test if implementation meets criteria from the description, like:
 //    val testInput = utils.readTestInput("day08/test_input")
@@ -31,8 +50,9 @@ fun main() {
 //    val area = testInput
 //        .map { it.toCharArray().toTypedArray() }
 //        .toTypedArray()
-//    println(part1(area, antennaFrequencies))
-//    println(part2(testInput))
+//    val antennaLocations = antennaFrequencies.associateWith { area.findAll(it) }
+//    println(part1(area, antennaLocations))
+//    println(part2(area, antennaLocations))
 
     val input = readInput("Day08")
     val antennaFrequencies = input.joinToString().toCharArray().distinct().toMutableList()
@@ -40,7 +60,8 @@ fun main() {
     val area = input
         .map { it.toCharArray().toTypedArray() }
         .toTypedArray()
-    println(part1(area, antennaFrequencies))
-//    println(part2(input))
+    val antennaLocations = antennaFrequencies.associateWith { area.findAll(it) }
+    println(part1(area, antennaLocations))
+    println(part2(area, antennaLocations))
 
 }
