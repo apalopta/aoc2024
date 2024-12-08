@@ -42,12 +42,22 @@ fun Direction.turnRight() = when (this) {
     Direction.WEST -> Direction.NORTH
 }
 
+typealias Distance = Position
+
 data class Position(val x: Int, val y: Int) {
     override fun toString(): String = "($x, $y)"
-    fun distanceTo(other: Position): Position = Position(other.x - x, other.y - y)
+    fun distanceTo(other: Position): Distance = Distance(other.x - x, other.y - y)
     fun fromHere(other: Position): Position = Position(x + other.x, y + other.y)
     fun fromHereBackwards(other: Position): Position = Position(x - other.x, y - other.y)
 }
+
+public inline fun <T> Iterable<T>.forEachExcept(t: T, action: (T) -> Unit): Unit {
+    this.filterNot { it == t}.run {
+        for (element in this) if (element != t) action(element)
+    }
+}
+
+fun List<Position>.exceptForPos(position: Position) = filter { it != position }
 
 fun Position.move(direction: Direction) = when (direction) {
     Direction.NORTH -> Position(x - 1, y)
@@ -57,6 +67,8 @@ fun Position.move(direction: Direction) = when (direction) {
 }
 
 typealias Area = Array<Array<Char>>
+
+fun List<String>.toArea() = map { it.toCharArray().toTypedArray() }.toTypedArray()
 
 fun Area.containsLocation(position: Position) =
     (position.x >= 0 && position.y >= 0 && position.x < this[0].size && position.y < size)
